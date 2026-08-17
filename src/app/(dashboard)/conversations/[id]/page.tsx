@@ -31,8 +31,8 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
 
   return (
     <div>
-      <Link href="/reports" className="text-sm font-medium text-brand-600 hover:underline">
-        ← Signalements
+      <Link href="/conversations" className="text-sm font-medium text-brand-600 hover:underline">
+        ← Conversations
       </Link>
 
       <h1 className="mt-3 text-xl font-extrabold tracking-tight text-ink">Conversation</h1>
