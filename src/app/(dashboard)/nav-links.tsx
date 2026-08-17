@@ -8,6 +8,7 @@ const NAV = [
   { href: '/users', label: 'Utilisateurs' },
   { href: '/reports', label: 'Signalements' },
   { href: '/support', label: 'Support' },
+  { href: '/revenue', label: 'Revenus' },
 ];
 
 export function NavLinks() {
