@@ -43,6 +43,27 @@ export default async function ReportsPage({
     : { data: [] };
   const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name || 'Sans nom']));
 
+  // Resolve, for each report tied to a trip, the conversation between the
+  // two people involved — lets the admin read it to help settle the dispute.
+  const tripIds = Array.from(new Set((reports ?? []).map((r) => r.trip_id).filter((v): v is string => !!v)));
+  const { data: conversationRows } = tripIds.length
+    ? await admin.from('conversations').select('id, trip_id, traveler_id, sender_id').in('trip_id', tripIds)
+    : { data: [] };
+  const conversationIdByReport = new Map(
+    (reports ?? [])
+      .map((r) => {
+        if (!r.trip_id) return null;
+        const match = (conversationRows ?? []).find(
+          (c) =>
+            c.trip_id === r.trip_id &&
+            ((c.traveler_id === r.reporter_id && c.sender_id === r.reported_user_id) ||
+              (c.traveler_id === r.reported_user_id && c.sender_id === r.reporter_id)),
+        );
+        return match ? [r.id, match.id] : null;
+      })
+      .filter((v): v is [string, string] => !!v),
+  );
+
   return (
     <div>
       <h1 className="text-xl font-extrabold tracking-tight text-ink">Signalements</h1>
@@ -87,6 +108,14 @@ export default async function ReportsPage({
               <ReportStatusButtons reportId={r.id} status={r.status} />
             </div>
             {r.description && <p className="mt-3 text-sm text-slate">{r.description}</p>}
+            {conversationIdByReport.has(r.id) && (
+              <Link
+                href={`/conversations/${conversationIdByReport.get(r.id)}`}
+                className="mt-3 inline-block text-xs font-semibold text-brand-600 hover:underline"
+              >
+                Voir la conversation entre les deux utilisateurs →
+              </Link>
+            )}
           </div>
         ))}
         {(!reports || reports.length === 0) && (
