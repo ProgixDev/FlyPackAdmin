@@ -42,52 +42,47 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
     }))
     .filter((r) => r.reportCount >= minReportsNum);
 
+  const inputClass =
+    'rounded-xl border border-hairline bg-brand-mist/60 px-3 py-1.5 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-200';
+
   return (
     <div>
-      <h1 className="text-xl font-bold text-slate-900">Utilisateurs</h1>
-      <p className="mt-1 text-sm text-slate-500">{rows.length} résultat(s)</p>
+      <h1 className="text-xl font-extrabold tracking-tight text-ink">Utilisateurs</h1>
+      <p className="mt-1 text-sm text-slate">{rows.length} résultat(s)</p>
 
-      <form className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+      <form className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-hairline bg-white p-4 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
         <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600">Inscrit depuis</label>
-          <input name="from" type="date" defaultValue={from} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+          <label className="mb-1 block text-xs font-semibold text-slate">Inscrit depuis</label>
+          <input name="from" type="date" defaultValue={from} className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600">Inscrit jusqu’à</label>
-          <input name="to" type="date" defaultValue={to} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+          <label className="mb-1 block text-xs font-semibold text-slate">Inscrit jusqu’à</label>
+          <input name="to" type="date" defaultValue={to} className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600">Pays</label>
-          <input
-            name="country"
-            defaultValue={country}
-            placeholder="Ex: Algérie"
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
-          />
+          <label className="mb-1 block text-xs font-semibold text-slate">Pays</label>
+          <input name="country" defaultValue={country} placeholder="Ex: Algérie" className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold text-slate-600">Signalements min.</label>
-          <input
-            name="minReports"
-            type="number"
-            min={0}
-            defaultValue={minReports}
-            className="w-28 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
-          />
+          <label className="mb-1 block text-xs font-semibold text-slate">Signalements min.</label>
+          <input name="minReports" type="number" min={0} defaultValue={minReports} className={`w-28 ${inputClass}`} />
         </div>
-        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+        <button
+          type="submit"
+          className="rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_25px_-10px_rgba(53,184,252,0.7)] transition hover:bg-brand-600"
+        >
           Filtrer
         </button>
         {(from || to || country || minReports) && (
-          <Link href="/users" className="text-sm font-medium text-slate-500 hover:underline">
+          <Link href="/users" className="text-sm font-medium text-slate hover:underline">
             Réinitialiser
           </Link>
         )}
       </form>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-hairline bg-white shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+          <thead className="border-b border-hairline bg-brand-mist text-xs font-semibold uppercase text-slate">
             <tr>
               <th className="px-4 py-3">Nom</th>
               <th className="px-4 py-3">E-mail</th>
@@ -102,20 +97,20 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
             {rows.map((r) => {
               const banned = r.bannedUntil && new Date(r.bannedUntil) > new Date();
               return (
-                <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-3 font-medium text-slate-900">{r.full_name || '—'}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.email}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                <tr key={r.id} className="border-b border-hairline last:border-0 hover:bg-brand-mist/40">
+                  <td className="px-4 py-3 font-semibold text-ink">{r.full_name || '—'}</td>
+                  <td className="px-4 py-3 text-slate">{r.email}</td>
+                  <td className="px-4 py-3 text-slate">
                     {[r.country, r.residence_city].filter(Boolean).join(' · ') || '—'}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
+                  <td className="px-4 py-3 text-slate">{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
                   <td className="px-4 py-3">
                     {r.reportCount > 0 ? (
                       <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
                         {r.reportCount}
                       </span>
                     ) : (
-                      <span className="text-slate-400">0</span>
+                      <span className="text-muted">0</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -128,7 +123,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/users/${r.id}`} className="font-medium text-blue-600 hover:underline">
+                    <Link href={`/users/${r.id}`} className="font-semibold text-brand-600 hover:underline">
                       Voir
                     </Link>
                   </td>

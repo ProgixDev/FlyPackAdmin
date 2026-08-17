@@ -1,17 +1,10 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
+import { NavLinks } from './nav-links';
 import { SignOutButton } from './sign-out-button';
-
-const NAV = [
-  { href: '/', label: 'Tableau de bord' },
-  { href: '/users', label: 'Utilisateurs' },
-  { href: '/reports', label: 'Signalements' },
-  { href: '/support', label: 'Support' },
-];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -25,22 +18,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!adminRow) redirect('/login');
 
   return (
-    <div className="flex flex-1">
-      <aside className="flex w-56 flex-col border-r border-slate-200 bg-white px-4 py-6">
-        <div className="mb-8 px-2 text-base font-extrabold text-slate-900">FlyBaze Admin</div>
-        <nav className="flex flex-col gap-1">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+    <div className="flex flex-1 bg-brand-mist">
+      <aside className="flex w-60 flex-col border-r border-hairline bg-white px-4 py-6">
+        <div className="mb-8 flex items-center gap-2.5 px-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-sm font-extrabold text-white shadow-[0_8px_20px_-8px_rgba(53,184,252,0.7)]">
+            F
+          </div>
+          <span className="text-base font-extrabold tracking-tight text-ink">FlyBaze Admin</span>
+        </div>
+        <NavLinks />
         <div className="mt-auto px-2">
-          <p className="mb-2 truncate text-xs text-slate-400">{user.email}</p>
+          <p className="mb-2 truncate text-xs text-muted">{user.email}</p>
           <SignOutButton />
         </div>
       </aside>

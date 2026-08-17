@@ -26,28 +26,31 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">FlyBaze Admin</h1>
-        <p className="mt-1 text-sm text-slate-500">Connexion réservée à l’équipe.</p>
+    <main className="flex flex-1 items-center justify-center bg-brand-mist px-4">
+      <form onSubmit={submit} className="w-full max-w-sm rounded-3xl border border-hairline bg-white p-8 shadow-[0_20px_50px_-20px_rgba(32,94,131,0.25)]">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500 shadow-[0_10px_25px_-8px_rgba(53,184,252,0.6)]">
+          <span className="text-2xl font-extrabold text-white">F</span>
+        </div>
+        <h1 className="text-xl font-extrabold tracking-tight text-ink">FlyBaze Admin</h1>
+        <p className="mt-1 text-sm text-slate">Connexion réservée à l’équipe.</p>
 
         <div className="mt-6 flex flex-col gap-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">E-mail</label>
+            <label className="mb-1.5 block text-xs font-semibold text-slate">E-mail</label>
             <input
               name="email"
               type="email"
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-hairline bg-brand-mist/60 px-3.5 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-200"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Mot de passe</label>
+            <label className="mb-1.5 block text-xs font-semibold text-slate">Mot de passe</label>
             <input
               name="password"
               type="password"
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-hairline bg-brand-mist/60 px-3.5 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-200"
             />
           </div>
 
@@ -56,7 +59,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="mt-2 w-full rounded-full bg-brand-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_10px_25px_-8px_rgba(53,184,252,0.6)] transition hover:bg-brand-600 disabled:opacity-50"
           >
             {busy ? 'Connexion…' : 'Se connecter'}
           </button>

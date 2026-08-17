@@ -13,7 +13,7 @@ export function SignOutButton() {
         router.replace('/login');
         router.refresh();
       }}
-      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-left text-xs font-semibold text-slate-500 hover:bg-slate-100"
+      className="w-full rounded-xl border border-hairline px-3 py-2 text-left text-xs font-semibold text-slate transition hover:bg-brand-mist hover:text-ink"
     >
       Se déconnecter
     </button>

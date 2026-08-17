@@ -19,7 +19,7 @@ export function TicketReply({ ticketId, status }: { ticketId: string; status: st
         onChange={(e) => setReply(e.target.value)}
         placeholder="Répondre à cet utilisateur…"
         rows={2}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-lg border border-hairline px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
       />
       <div className="flex gap-2">
         <button
@@ -31,7 +31,7 @@ export function TicketReply({ ticketId, status }: { ticketId: string; status: st
               router.refresh();
             })
           }
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-600 disabled:opacity-50"
         >
           Envoyer la réponse
         </button>
@@ -43,7 +43,7 @@ export function TicketReply({ ticketId, status }: { ticketId: string; status: st
               router.refresh();
             })
           }
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+          className="rounded-lg border border-hairline px-3 py-1.5 text-xs font-semibold text-slate hover:bg-brand-mist disabled:opacity-50"
         >
           Fermer le ticket
         </button>

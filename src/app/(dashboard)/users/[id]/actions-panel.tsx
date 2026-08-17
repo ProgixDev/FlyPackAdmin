@@ -62,7 +62,7 @@ export function DisableVisibilityButton({ tripId, userId }: { tripId: string; us
           router.refresh();
         })
       }
-      className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+      className="rounded-lg border border-hairline px-2.5 py-1 text-xs font-semibold text-slate hover:bg-brand-mist disabled:opacity-50"
     >
       Désactiver la mise en avant
     </button>

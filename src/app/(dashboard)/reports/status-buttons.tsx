@@ -23,7 +23,7 @@ export function ReportStatusButtons({ reportId, status }: { reportId: string; st
         <button
           disabled={pending}
           onClick={() => set('reviewed')}
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+          className="rounded-lg border border-hairline px-3 py-1.5 text-xs font-semibold text-slate hover:bg-brand-mist disabled:opacity-50"
         >
           Marquer en cours d’examen
         </button>
@@ -38,7 +38,7 @@ export function ReportStatusButtons({ reportId, status }: { reportId: string; st
       <button
         disabled={pending}
         onClick={() => set('dismissed')}
-        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+        className="rounded-lg border border-hairline px-3 py-1.5 text-xs font-semibold text-slate hover:bg-brand-mist disabled:opacity-50"
       >
         Rejeter
       </button>
