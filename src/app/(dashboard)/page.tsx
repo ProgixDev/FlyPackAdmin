@@ -6,9 +6,7 @@ import {
   ShieldCheck,
   ShieldOff,
   Star,
-  UserPlus,
   Users,
-  Weight,
 } from 'lucide-react';
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -22,16 +20,34 @@ const ACCENT_HEX: Record<'brand' | 'red' | 'emerald' | 'amber', string> = {
   amber: '#F59E0B',
 };
 
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  if (values.length < 2) return null;
+  const w = 72;
+  const h = 24;
+  const max = Math.max(1, ...values);
+  const step = w / (values.length - 1);
+  const points = values.map((v, i) => `${i * step},${h - (v / max) * h}`).join(' ');
+  return (
+    <svg width={w} height={h} className="overflow-visible">
+      <polyline points={points} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
+    </svg>
+  );
+}
+
 function StatCard({
   label,
   value,
   hint,
+  delta,
+  sparkline,
   icon: Icon,
   accent = 'brand',
 }: {
   label: string;
   value: string | number;
   hint?: string;
+  delta?: string;
+  sparkline?: number[];
   icon: React.ComponentType<{ size?: number; className?: string }>;
   accent?: 'brand' | 'red' | 'emerald' | 'amber';
 }) {
@@ -54,11 +70,17 @@ function StatCard({
         style={{ backgroundColor: ACCENT_HEX[accent] }}
       />
 
-      <div className="relative">
+      <div className="relative flex items-start justify-between">
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}>
           <Icon size={19} />
         </div>
-        <p className="mt-3 text-2xl font-extrabold text-ink">{value}</p>
+        {sparkline && <Sparkline values={sparkline} color={ACCENT_HEX[accent]} />}
+      </div>
+      <div className="relative">
+        <div className="mt-3 flex items-baseline gap-2">
+          <p className="text-2xl font-extrabold text-ink">{value}</p>
+          {delta && <span className="text-xs font-semibold text-emerald-600">{delta}</span>}
+        </div>
         <p className="mt-0.5 text-xs font-semibold text-muted">{label}</p>
         {hint && <p className="mt-1 text-xs text-slate">{hint}</p>}
       </div>
@@ -66,61 +88,32 @@ function StatCard({
   );
 }
 
-function RingStat({
+function MiniChip({
   label,
-  hint,
-  percent,
+  value,
   icon: Icon,
   accent = 'brand',
 }: {
   label: string;
-  hint?: string;
-  percent: number;
+  value: string | number;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   accent?: 'brand' | 'red' | 'emerald' | 'amber';
 }) {
-  const size = 68;
-  const stroke = 7;
-  const r = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * r;
-  const clamped = Math.max(0, Math.min(100, percent));
-  const offset = circumference - (clamped / 100) * circumference;
-  const color = ACCENT_HEX[accent];
+  const tint = {
+    brand: 'bg-brand-tint text-brand-600',
+    red: 'bg-red-100 text-red-600',
+    emerald: 'bg-emerald-100 text-emerald-600',
+    amber: 'bg-amber-100 text-amber-600',
+  }[accent];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)] transition hover:shadow-[0_14px_30px_-16px_rgba(32,94,131,0.45)]">
-      <div
-        className="pointer-events-none absolute -right-8 -bottom-8 h-28 w-28 rounded-full opacity-[0.07]"
-        style={{ backgroundColor: color }}
-      />
-      <div className="relative flex items-center gap-4">
-        <div className="relative flex h-[68px] w-[68px] flex-shrink-0 items-center justify-center">
-          <svg width={size} height={size} className="-rotate-90">
-            <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#F1FAFF" strokeWidth={stroke} />
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={r}
-              fill="none"
-              stroke={color}
-              strokeWidth={stroke}
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              strokeLinecap="round"
-            />
-          </svg>
-          <span className="absolute text-sm font-extrabold text-ink">{Math.round(clamped)}%</span>
-        </div>
-        <div>
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg"
-            style={{ backgroundColor: `${color}1A`, color }}
-          >
-            <Icon size={16} />
-          </div>
-          <p className="mt-2 text-xs font-semibold text-muted">{label}</p>
-          {hint && <p className="mt-0.5 text-xs text-slate">{hint}</p>}
-        </div>
+    <div className="flex flex-1 items-center gap-3 rounded-xl border border-hairline bg-white px-4 py-3">
+      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${tint}`}>
+        <Icon size={15} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-extrabold leading-tight text-ink">{value}</p>
+        <p className="truncate text-[11px] font-medium leading-tight text-muted">{label}</p>
       </div>
     </div>
   );
@@ -209,6 +202,7 @@ export default async function DashboardPage() {
     label: new Date(key).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
     value,
   }));
+  const signupSparkline = signupSeries.slice(-14).map((d) => d.value);
 
   const REPORT_STATUS_META: Record<string, { label: string; color: string }> = {
     pending: { label: 'En attente', color: '#EF4444' },
@@ -241,31 +235,30 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Utilisateurs inscrits" value={totalUsers ?? 0} icon={Users} />
-        <StatCard label="Nouveaux aujourd’hui" value={newToday ?? 0} icon={UserPlus} accent="emerald" />
-        <StatCard label="Nouveaux cette semaine" value={newThisWeek ?? 0} icon={UserPlus} accent="emerald" />
+        <StatCard
+          label="Utilisateurs inscrits"
+          value={totalUsers ?? 0}
+          delta={(newToday ?? 0) > 0 ? `+${newToday} auj.` : undefined}
+          hint={`+${newThisWeek ?? 0} cette semaine`}
+          sparkline={signupSparkline}
+          icon={Users}
+        />
         <StatCard label="Trajets actifs" value={activeTrips} hint={`${kilosAvailable} kg disponibles`} icon={PlaneTakeoff} />
         <StatCard label="Colis échangés" value={totalBookings ?? 0} hint={`${confirmedBookings ?? 0} confirmés`} icon={Package} />
         <StatCard
           label="Signalements en attente"
           value={pendingReports ?? 0}
+          hint="À traiter en priorité"
           icon={AlertTriangle}
           accent={(pendingReports ?? 0) > 0 ? 'red' : 'emerald'}
         />
-        <StatCard
-          label="Tickets support ouverts"
-          value={openTickets ?? 0}
-          icon={LifeBuoy}
-          accent={(openTickets ?? 0) > 0 ? 'amber' : 'emerald'}
-        />
-        <StatCard label="Comptes bannis / suspendus" value={bannedCount} icon={ShieldOff} accent={bannedCount > 0 ? 'red' : 'emerald'} />
       </div>
 
-      <p className="mt-8 text-xs font-bold uppercase tracking-wide text-muted">Santé de la plateforme</p>
-      <div className="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <RingStat label="Comptes vérifiés" percent={verifiedPct} hint={`${verifiedUsers ?? 0} sur ${totalUsers ?? 0}`} icon={ShieldCheck} accent="emerald" />
-        <StatCard label="Note moyenne" value={avgRating.toFixed(1)} hint="Sur les profils notés" icon={Star} accent="amber" />
-        <StatCard label="Kilos disponibles" value={kilosAvailable} hint="Sur les trajets actifs" icon={Weight} />
+      <div className="mt-4 flex flex-wrap gap-3">
+        <MiniChip label="Comptes vérifiés" value={`${verifiedPct}%`} icon={ShieldCheck} accent="emerald" />
+        <MiniChip label="Note moyenne" value={avgRating.toFixed(1)} icon={Star} accent="amber" />
+        <MiniChip label="Tickets support" value={openTickets ?? 0} icon={LifeBuoy} accent={(openTickets ?? 0) > 0 ? 'amber' : 'brand'} />
+        <MiniChip label="Bannis / suspendus" value={bannedCount} icon={ShieldOff} accent={bannedCount > 0 ? 'red' : 'brand'} />
       </div>
 
       <div className="mt-8 rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
