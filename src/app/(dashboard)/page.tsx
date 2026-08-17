@@ -13,6 +13,8 @@ import {
 
 import { createAdminClient } from '@/lib/supabase/admin';
 
+import { BarChart, DoughnutChart, LineChart } from './charts';
+
 const ACCENT_HEX: Record<'brand' | 'red' | 'emerald' | 'amber', string> = {
   brand: '#35B8FC',
   red: '#EF4444',
@@ -146,6 +148,8 @@ export default async function DashboardPage() {
     { data: ratedProfiles },
     { data: destinationRows },
     { data: recentUsers },
+    { data: signupRows },
+    { data: allReportStatuses },
   ] = await Promise.all([
     admin.from('profiles').select('id', { count: 'exact', head: true }),
     admin.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', startOfToday),
@@ -164,6 +168,11 @@ export default async function DashboardPage() {
     admin.from('profiles').select('rating').gt('rating', 0),
     admin.from('trips').select('to_city'),
     admin.from('profiles').select('full_name, created_at').order('created_at', { ascending: false }).limit(5),
+    admin
+      .from('profiles')
+      .select('created_at')
+      .gte('created_at', new Date(now.getTime() - 29 * 86_400_000).toISOString()),
+    admin.from('reports').select('status'),
   ]);
 
   const bannedCount = (authList?.users ?? []).filter(
@@ -184,9 +193,38 @@ export default async function DashboardPage() {
   const topDestinations = Array.from(destinationCounts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-  const maxDestCount = topDestinations[0]?.[1] ?? 1;
 
   const verifiedPct = totalUsers ? Math.round(((verifiedUsers ?? 0) / totalUsers) * 100) : 0;
+
+  const signupsByDay = new Map<string, number>();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86_400_000);
+    signupsByDay.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const row of signupRows ?? []) {
+    const key = row.created_at.slice(0, 10);
+    if (signupsByDay.has(key)) signupsByDay.set(key, (signupsByDay.get(key) ?? 0) + 1);
+  }
+  const signupSeries = Array.from(signupsByDay.entries()).map(([key, value]) => ({
+    label: new Date(key).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+    value,
+  }));
+
+  const REPORT_STATUS_META: Record<string, { label: string; color: string }> = {
+    pending: { label: 'En attente', color: '#EF4444' },
+    reviewed: { label: 'En cours', color: '#F59E0B' },
+    resolved: { label: 'Résolu', color: '#10B981' },
+    dismissed: { label: 'Rejeté', color: '#94A3B8' },
+  };
+  const reportStatusCounts = new Map<string, number>();
+  for (const r of allReportStatuses ?? []) {
+    reportStatusCounts.set(r.status, (reportStatusCounts.get(r.status) ?? 0) + 1);
+  }
+  const reportStatusSeries = Object.entries(REPORT_STATUS_META).map(([key, meta]) => ({
+    label: meta.label,
+    value: reportStatusCounts.get(key) ?? 0,
+    color: meta.color,
+  }));
 
   return (
     <div>
@@ -230,37 +268,39 @@ export default async function DashboardPage() {
         <StatCard label="Kilos disponibles" value={kilosAvailable} hint="Sur les trajets actifs" icon={Weight} />
       </div>
 
+      <div className="mt-8 rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">Nouvelles inscriptions (30 derniers jours)</p>
+        <div className="mt-4">
+          <LineChart data={signupSeries} />
+        </div>
+      </div>
+
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
           <p className="text-xs font-bold uppercase tracking-wide text-muted">Destinations les plus demandées</p>
-          <div className="mt-4 flex flex-col gap-3">
-            {topDestinations.map(([city, count]) => (
-              <div key={city} className="flex items-center gap-3">
-                <span className="w-24 flex-shrink-0 truncate text-sm font-semibold text-ink">{city}</span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-brand-mist">
-                  <div
-                    className="h-full rounded-full bg-brand-500"
-                    style={{ width: `${Math.max(8, (count / maxDestCount) * 100)}%` }}
-                  />
-                </div>
-                <span className="w-6 flex-shrink-0 text-right text-xs font-semibold text-muted">{count}</span>
-              </div>
-            ))}
-            {topDestinations.length === 0 && <p className="text-sm text-muted">Aucun trajet pour l’instant.</p>}
+          <div className="mt-4">
+            <BarChart data={topDestinations.map(([label, value]) => ({ label, value }))} />
           </div>
         </div>
 
         <div className="rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
-          <p className="text-xs font-bold uppercase tracking-wide text-muted">Derniers inscrits</p>
-          <div className="mt-4 flex flex-col gap-3">
-            {(recentUsers ?? []).map((u, i) => (
-              <div key={i} className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-ink">{u.full_name || 'Sans nom'}</span>
-                <span className="text-xs text-muted">{new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
-              </div>
-            ))}
-            {(!recentUsers || recentUsers.length === 0) && <p className="text-sm text-muted">Aucun inscrit.</p>}
+          <p className="text-xs font-bold uppercase tracking-wide text-muted">Signalements par statut</p>
+          <div className="mt-4">
+            <DoughnutChart data={reportStatusSeries} />
           </div>
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)]">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">Derniers inscrits</p>
+        <div className="mt-4 flex flex-col gap-3">
+          {(recentUsers ?? []).map((u, i) => (
+            <div key={i} className="flex items-center justify-between text-sm">
+              <span className="font-semibold text-ink">{u.full_name || 'Sans nom'}</span>
+              <span className="text-xs text-muted">{new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+            </div>
+          ))}
+          {(!recentUsers || recentUsers.length === 0) && <p className="text-sm text-muted">Aucun inscrit.</p>}
         </div>
       </div>
 
