@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -21,8 +22,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex flex-1 bg-brand-mist">
       <aside className="flex w-60 flex-col border-r border-hairline bg-white px-4 py-6">
         <div className="mb-8 flex items-center gap-2.5 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-sm font-extrabold text-white shadow-[0_8px_20px_-8px_rgba(53,184,252,0.7)]">
-            F
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl shadow-[0_8px_20px_-8px_rgba(53,184,252,0.7)]">
+            <Image src="/logo.png" alt="FlyBaze Express" width={40} height={40} className="h-full w-full object-cover" priority />
           </div>
           <span className="text-base font-extrabold tracking-tight text-ink">FlyBaze Admin</span>
         </div>

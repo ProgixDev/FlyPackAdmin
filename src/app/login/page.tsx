@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
@@ -26,10 +27,16 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-brand-mist px-4">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-3xl border border-hairline bg-white p-8 shadow-[0_20px_50px_-20px_rgba(32,94,131,0.25)]">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500 shadow-[0_10px_25px_-8px_rgba(53,184,252,0.6)]">
-          <span className="text-2xl font-extrabold text-white">F</span>
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-brand-mist via-brand-mist to-white px-4">
+      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-brand-300/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl" />
+
+      <form
+        onSubmit={submit}
+        className="relative w-full max-w-sm rounded-3xl border border-hairline bg-white/90 p-8 shadow-[0_30px_60px_-25px_rgba(32,94,131,0.35)] backdrop-blur"
+      >
+        <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-[0_12px_28px_-10px_rgba(53,184,252,0.6)]">
+          <Image src="/logo.png" alt="FlyBaze Express" width={64} height={64} className="h-full w-full object-cover" priority />
         </div>
         <h1 className="text-xl font-extrabold tracking-tight text-ink">FlyBaze Admin</h1>
         <p className="mt-1 text-sm text-slate">Connexion réservée à l’équipe.</p>

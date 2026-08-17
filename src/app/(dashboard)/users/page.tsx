@@ -98,7 +98,14 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
               const banned = r.bannedUntil && new Date(r.bannedUntil) > new Date();
               return (
                 <tr key={r.id} className="border-b border-hairline last:border-0 hover:bg-brand-mist/40">
-                  <td className="px-4 py-3 font-semibold text-ink">{r.full_name || '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint text-xs font-bold text-brand-700">
+                        {(r.full_name || '?').trim().charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-semibold text-ink">{r.full_name || '—'}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-slate">{r.email}</td>
                   <td className="px-4 py-3 text-slate">
                     {[r.country, r.residence_city].filter(Boolean).join(' · ') || '—'}
