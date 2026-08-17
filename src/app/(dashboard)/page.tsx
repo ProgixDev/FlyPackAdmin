@@ -13,6 +13,13 @@ import {
 
 import { createAdminClient } from '@/lib/supabase/admin';
 
+const ACCENT_HEX: Record<'brand' | 'red' | 'emerald' | 'amber', string> = {
+  brand: '#35B8FC',
+  red: '#EF4444',
+  emerald: '#10B981',
+  amber: '#F59E0B',
+};
+
 function StatCard({
   label,
   value,
@@ -34,13 +41,85 @@ function StatCard({
   }[accent];
 
   return (
-    <div className="rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)] transition hover:shadow-[0_14px_30px_-16px_rgba(32,94,131,0.45)]">
-      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}>
-        <Icon size={19} />
+    <div className="relative overflow-hidden rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)] transition hover:shadow-[0_14px_30px_-16px_rgba(32,94,131,0.45)]">
+      {/* Decorative geometry — purely visual, sits behind the content. */}
+      <div
+        className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full opacity-[0.08]"
+        style={{ backgroundColor: ACCENT_HEX[accent] }}
+      />
+      <div
+        className="pointer-events-none absolute -right-2 -top-2 h-10 w-10 rotate-12 rounded-lg opacity-[0.10]"
+        style={{ backgroundColor: ACCENT_HEX[accent] }}
+      />
+
+      <div className="relative">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tint}`}>
+          <Icon size={19} />
+        </div>
+        <p className="mt-3 text-2xl font-extrabold text-ink">{value}</p>
+        <p className="mt-0.5 text-xs font-semibold text-muted">{label}</p>
+        {hint && <p className="mt-1 text-xs text-slate">{hint}</p>}
       </div>
-      <p className="mt-3 text-2xl font-extrabold text-ink">{value}</p>
-      <p className="mt-0.5 text-xs font-semibold text-muted">{label}</p>
-      {hint && <p className="mt-1 text-xs text-slate">{hint}</p>}
+    </div>
+  );
+}
+
+function RingStat({
+  label,
+  hint,
+  percent,
+  icon: Icon,
+  accent = 'brand',
+}: {
+  label: string;
+  hint?: string;
+  percent: number;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  accent?: 'brand' | 'red' | 'emerald' | 'amber';
+}) {
+  const size = 68;
+  const stroke = 7;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, percent));
+  const offset = circumference - (clamped / 100) * circumference;
+  const color = ACCENT_HEX[accent];
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-hairline bg-white p-5 shadow-[0_10px_25px_-18px_rgba(32,94,131,0.35)] transition hover:shadow-[0_14px_30px_-16px_rgba(32,94,131,0.45)]">
+      <div
+        className="pointer-events-none absolute -right-8 -bottom-8 h-28 w-28 rounded-full opacity-[0.07]"
+        style={{ backgroundColor: color }}
+      />
+      <div className="relative flex items-center gap-4">
+        <div className="relative flex h-[68px] w-[68px] flex-shrink-0 items-center justify-center">
+          <svg width={size} height={size} className="-rotate-90">
+            <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#F1FAFF" strokeWidth={stroke} />
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              fill="none"
+              stroke={color}
+              strokeWidth={stroke}
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="absolute text-sm font-extrabold text-ink">{Math.round(clamped)}%</span>
+        </div>
+        <div>
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-lg"
+            style={{ backgroundColor: `${color}1A`, color }}
+          >
+            <Icon size={16} />
+          </div>
+          <p className="mt-2 text-xs font-semibold text-muted">{label}</p>
+          {hint && <p className="mt-0.5 text-xs text-slate">{hint}</p>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -111,12 +190,16 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-brand-400 p-6 text-white shadow-[0_20px_45px_-20px_rgba(32,94,131,0.55)]">
-        <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-500 to-brand-400 p-6 text-white shadow-[0_20px_45px_-20px_rgba(32,94,131,0.55)]">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full border-[16px] border-white/10" />
+        <div className="pointer-events-none absolute -right-24 bottom-[-70px] h-40 w-40 rotate-12 rounded-[28%] bg-white/10" />
+        <div className="pointer-events-none absolute right-16 top-6 h-10 w-10 rounded-xl bg-white/10" />
+
+        <p className="relative text-xs font-semibold uppercase tracking-wide text-white/70">
           {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
-        <h1 className="mt-1 text-2xl font-extrabold tracking-tight">Tableau de bord</h1>
-        <p className="mt-1 text-sm text-white/80">Vue d’ensemble de FlyBaze Express.</p>
+        <h1 className="relative mt-1 text-2xl font-extrabold tracking-tight">Tableau de bord</h1>
+        <p className="relative mt-1 text-sm text-white/80">Vue d’ensemble de FlyBaze Express.</p>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -142,7 +225,7 @@ export default async function DashboardPage() {
 
       <p className="mt-8 text-xs font-bold uppercase tracking-wide text-muted">Santé de la plateforme</p>
       <div className="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <StatCard label="Comptes vérifiés" value={`${verifiedPct}%`} hint={`${verifiedUsers ?? 0} sur ${totalUsers ?? 0}`} icon={ShieldCheck} accent="emerald" />
+        <RingStat label="Comptes vérifiés" percent={verifiedPct} hint={`${verifiedUsers ?? 0} sur ${totalUsers ?? 0}`} icon={ShieldCheck} accent="emerald" />
         <StatCard label="Note moyenne" value={avgRating.toFixed(1)} hint="Sur les profils notés" icon={Star} accent="amber" />
         <StatCard label="Kilos disponibles" value={kilosAvailable} hint="Sur les trajets actifs" icon={Weight} />
       </div>
