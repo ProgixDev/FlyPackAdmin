@@ -231,7 +231,7 @@ export default async function DashboardPage() {
           {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
         <h1 className="relative mt-1 text-2xl font-extrabold tracking-tight">Tableau de bord</h1>
-        <p className="relative mt-1 text-sm text-white/80">Vue d’ensemble de FlyBaze Express.</p>
+        <p className="relative mt-1 text-sm text-white/80">Vue d’ensemble de Flybaz Express.</p>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">

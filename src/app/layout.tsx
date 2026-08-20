@@ -9,8 +9,8 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "FlyBaze Admin",
-  description: "Back-office FlyBaze Express",
+  title: "Flybaz Admin",
+  description: "Back-office Flybaz Express",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

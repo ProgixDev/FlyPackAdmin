@@ -36,9 +36,9 @@ export default function LoginPage() {
         className="relative w-full max-w-sm rounded-3xl border border-hairline bg-white/90 p-8 shadow-[0_30px_60px_-25px_rgba(32,94,131,0.35)] backdrop-blur"
       >
         <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-[0_12px_28px_-10px_rgba(53,184,252,0.6)]">
-          <Image src="/logo.png" alt="FlyBaze Express" width={64} height={64} className="h-full w-full object-cover" priority />
+          <Image src="/logo.png" alt="Flybaz Express" width={64} height={64} className="h-full w-full object-cover" priority />
         </div>
-        <h1 className="text-xl font-extrabold tracking-tight text-ink">FlyBaze Admin</h1>
+        <h1 className="text-xl font-extrabold tracking-tight text-ink">Flybaz Admin</h1>
         <p className="mt-1 text-sm text-slate">Connexion réservée à l’équipe.</p>
 
         <div className="mt-6 flex flex-col gap-4">

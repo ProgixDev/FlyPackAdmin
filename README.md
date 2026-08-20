@@ -1,6 +1,6 @@
-# FlyBaze Admin
+# Flybaz Admin
 
-Back-office web app for FlyBaze Express — separate from the mobile app repo, same Supabase backend (project `ppwugogzftmtlqiekiji`).
+Back-office web app for Flybaz Express — separate from the mobile app repo, same Supabase backend (project `ppwugogzftmtlqiekiji`).
 
 ## Setup
 
