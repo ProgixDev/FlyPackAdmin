@@ -15,13 +15,28 @@ export async function signIn(formData: FormData) {
     return { error: 'Configuration Supabase absente. Vérifiez les variables d’environnement.' };
   }
 
+  // L'hôte réellement contacté : une faute de frappe dans l'URL du projet
+  // produit un échec réseau indistinguable d'une panne Supabase.
+  let target = process.env.NEXT_PUBLIC_SUPABASE_URL.trim();
+  try {
+    target = new URL(target).host;
+  } catch {
+    console.error('[login] NEXT_PUBLIC_SUPABASE_URL n’est pas une URL valide :', JSON.stringify(target));
+    return { error: `L’URL Supabase configurée est invalide : ${JSON.stringify(target)}` };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     // Le détail part dans les logs serveur : c'est la seule trace exploitable
     // quand la connexion échoue pour une raison qui n'est pas le mot de passe.
-    console.error('[login] signInWithPassword a échoué :', error.status, error.code, error.message);
+    // `cause` porte le code réseau (ENOTFOUND, ECONNREFUSED…) quand il y en a un.
+    console.error(
+      '[login] signInWithPassword a échoué :',
+      JSON.stringify({ host: target, status: error.status, code: error.code, message: error.message }),
+      (error as { cause?: unknown }).cause ?? '',
+    );
 
     if (error.code === 'email_not_confirmed') {
       return { error: 'Cet e-mail n’est pas confirmé. Confirmez-le dans Supabase, ou cochez « Auto Confirm User ».' };
@@ -30,7 +45,7 @@ export async function signIn(formData: FormData) {
       return { error: 'Clé Supabase refusée. La clé anon/publishable configurée n’est plus valide.' };
     }
     if (!error.status) {
-      return { error: 'Supabase est injoignable depuis le serveur.' };
+      return { error: `Supabase injoignable depuis le serveur. Hôte contacté : ${target}` };
     }
     return { error: 'Identifiants incorrects.' };
   }
