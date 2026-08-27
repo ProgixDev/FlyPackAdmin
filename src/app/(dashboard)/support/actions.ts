@@ -2,25 +2,23 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { requireAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient } from '@/lib/supabase/server';
 
 export async function replyToTicket(ticketId: string, reply: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const adminId = await requireAdmin();
 
   const admin = createAdminClient();
   const { error } = await admin
     .from('support_tickets')
-    .update({ admin_reply: reply, status: 'answered', answered_by: user?.id ?? null, updated_at: new Date().toISOString() })
+    .update({ admin_reply: reply, status: 'answered', answered_by: adminId, updated_at: new Date().toISOString() })
     .eq('id', ticketId);
   if (error) throw error;
   revalidatePath('/support');
 }
 
 export async function closeTicket(ticketId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin
     .from('support_tickets')
