@@ -39,6 +39,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_messages: {
+        Row: {
+          admin_id: string | null
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_messages_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admins: {
         Row: {
           created_at: string
@@ -324,36 +369,42 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          message_id: string | null
           reason: string
           reported_user_id: string
           reporter_id: string
           resolved_at: string | null
           resolved_by: string | null
           status: string
+          target_type: string
           trip_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          message_id?: string | null
           reason: string
           reported_user_id: string
           reporter_id: string
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          target_type?: string
           trip_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          message_id?: string | null
           reason?: string
           reported_user_id?: string
           reporter_id?: string
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          target_type?: string
           trip_id?: string | null
         }
         Relationships: [
@@ -376,6 +427,13 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
@@ -452,6 +510,95 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sanctions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          duration_days: number | null
+          ends_at: string | null
+          id: string
+          kind: string
+          lifted_at: string | null
+          lifted_by: string | null
+          note: string | null
+          reason: string
+          reinstatement_amount_cents: number
+          reinstatement_currency: string
+          reinstatement_paid_at: string | null
+          reinstatement_payment_ref: string | null
+          report_id: string | null
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          duration_days?: number | null
+          ends_at?: string | null
+          id?: string
+          kind: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          note?: string | null
+          reason: string
+          reinstatement_amount_cents?: number
+          reinstatement_currency?: string
+          reinstatement_paid_at?: string | null
+          reinstatement_payment_ref?: string | null
+          report_id?: string | null
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          duration_days?: number | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          note?: string | null
+          reason?: string
+          reinstatement_amount_cents?: number
+          reinstatement_currency?: string
+          reinstatement_paid_at?: string | null
+          reinstatement_payment_ref?: string | null
+          report_id?: string | null
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sanctions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sanctions_lifted_by_fkey"
+            columns: ["lifted_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sanctions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sanctions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -659,7 +806,16 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      admin_user_ips: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          ip: string
+          events: number
+          first_seen: string
+          last_seen: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
