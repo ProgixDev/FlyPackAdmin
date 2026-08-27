@@ -8,15 +8,51 @@ export async function signIn(formData: FormData) {
   const password = String(formData.get('password') || '');
   if (!email || !password) return { error: 'Entrez votre e-mail et votre mot de passe.' };
 
+  // Une configuration incomplète produisait la même erreur qu'un mauvais mot de
+  // passe, ce qui rend la panne indiscernable d'une faute de frappe.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('[login] Variables Supabase manquantes côté serveur.');
+    return { error: 'Configuration Supabase absente. Vérifiez les variables d’environnement.' };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: 'Identifiants incorrects.' };
+
+  if (error) {
+    // Le détail part dans les logs serveur : c'est la seule trace exploitable
+    // quand la connexion échoue pour une raison qui n'est pas le mot de passe.
+    console.error('[login] signInWithPassword a échoué :', error.status, error.code, error.message);
+
+    if (error.code === 'email_not_confirmed') {
+      return { error: 'Cet e-mail n’est pas confirmé. Confirmez-le dans Supabase, ou cochez « Auto Confirm User ».' };
+    }
+    if (error.status === 401 && error.code !== 'invalid_credentials') {
+      return { error: 'Clé Supabase refusée. La clé anon/publishable configurée n’est plus valide.' };
+    }
+    if (!error.status) {
+      return { error: 'Supabase est injoignable depuis le serveur.' };
+    }
+    return { error: 'Identifiants incorrects.' };
+  }
 
   const admin = createAdminClient();
-  const { data: adminRow } = await admin.from('admins').select('id').eq('id', data.user.id).maybeSingle();
+  const { data: adminRow, error: adminError } = await admin
+    .from('admins')
+    .select('id')
+    .eq('id', data.user.id)
+    .maybeSingle();
+
+  if (adminError) {
+    console.error('[login] Lecture de la table admins impossible :', adminError.message);
+    await supabase.auth.signOut();
+    return { error: 'Impossible de vérifier les droits administrateur. Vérifiez la clé service-role.' };
+  }
+
   if (!adminRow) {
     await supabase.auth.signOut();
-    return { error: 'Ce compte n’a pas les droits administrateur.' };
+    return {
+      error: `Ce compte n’a pas les droits administrateur. Ajoutez son identifiant (${data.user.id}) dans la table admins.`,
+    };
   }
 
   return { error: null };
