@@ -175,15 +175,17 @@ export function DoughnutChart({ data }: { data: { label: string; value: number; 
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
 
-  const segments = useMemo(() => {
-    let acc = 0;
-    return data.map((d) => {
-      const fraction = total > 0 ? d.value / total : 0;
-      const seg = { ...d, fraction, offset: acc };
-      acc += fraction;
-      return seg;
-    });
-  }, [data, total]);
+  const segments = useMemo(
+    () =>
+      data.map((d, i) => {
+        const fraction = total > 0 ? d.value / total : 0;
+        // Décalage = somme des fractions précédentes, calculée sans accumulateur muté.
+        const offset =
+          total > 0 ? data.slice(0, i).reduce((sum, prev) => sum + prev.value, 0) / total : 0;
+        return { ...d, fraction, offset };
+      }),
+    [data, total],
+  );
 
   return (
     <div className="flex items-center gap-6">
